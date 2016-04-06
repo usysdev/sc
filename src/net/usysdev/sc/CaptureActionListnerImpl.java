@@ -2,8 +2,6 @@ package net.usysdev.sc;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 
 import javax.swing.JOptionPane;
 
@@ -13,28 +11,23 @@ import javax.swing.JOptionPane;
  */
 public final class CaptureActionListnerImpl implements ActionListener {
 
-    private final String outputDirName;
+    private final SCProperties scProperties;
 
 
-    public CaptureActionListnerImpl(String outputDirName) {
+    public CaptureActionListnerImpl(SCProperties scProperties) {
 
-        this.outputDirName = outputDirName;
+        this.scProperties = scProperties;
     }
 
 
     public void actionPerformed(ActionEvent event) {
 
         try {
-            CaptureUtil.capture(outputDirName);
+            CaptureUtil.capture(scProperties.getSaveFolder());
         } catch (Exception e) {
-            StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
-            e.printStackTrace(pw);
-            pw.flush();
-            pw.close();
             JOptionPane.showMessageDialog(
                 null,
-                sw.toString(),
+                e.toString(),
                 "常駐スクリーンキャプチャ",
                 JOptionPane.ERROR_MESSAGE);
         }

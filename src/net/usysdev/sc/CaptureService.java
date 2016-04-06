@@ -11,8 +11,7 @@ import java.awt.Toolkit;
 import java.awt.TrayIcon;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import java.io.IOException;
 
 import javax.imageio.ImageIO;
 import javax.swing.JOptionPane;
@@ -25,20 +24,35 @@ public final class CaptureService {
 
     public static void main(String[] args) {
 
-        final String outputDirName = System.getProperty("user.dir");
+        final SCProperties scProperties;
+        try {
+            scProperties = new SCProperties();
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(
+                null,
+                e.toString(),
+                "常駐スクリーンキャプチャ",
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
 
         try {
             final PopupMenu menu = new PopupMenu();
 
             {
-                final MenuItem captureItem = new MenuItem("撮影");
-                menu.add(captureItem);
-                captureItem.addActionListener(new CaptureActionListnerImpl(outputDirName));
+                final MenuItem menuItem = new MenuItem("撮影");
+                menu.add(menuItem);
+                menuItem.addActionListener(new CaptureActionListnerImpl(scProperties));
             }
             {
-                final MenuItem exitItem = new MenuItem("終了");
-                menu.add(exitItem);
-                exitItem.addActionListener(new ExitActionListnerImpl());
+                final MenuItem menuItem = new MenuItem("設定");
+                menu.add(menuItem);
+                menuItem.addActionListener(new PrefernceActionListnerImpl(scProperties));
+            }
+            {
+                final MenuItem menuItem = new MenuItem("終了");
+                menu.add(menuItem);
+                menuItem.addActionListener(new ExitActionListnerImpl());
             }
 
             final Image image = ImageIO.read(Thread.currentThread().getContextClassLoader().getResourceAsStream("icon.png"));
@@ -46,20 +60,15 @@ public final class CaptureService {
             icon.setPopupMenu(menu);
             SystemTray.getSystemTray().add(icon);
 
-            CaptureUtil.capture(outputDirName);
+            CaptureUtil.capture(scProperties.getSaveFolder());
             while(true) {
                 Thread.sleep(getSleepTime());
-                CaptureUtil.capture(outputDirName);
+                CaptureUtil.capture(scProperties.getSaveFolder());
             }
         } catch (Exception e) {
-            StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
-            e.printStackTrace(pw);
-            pw.flush();
-            pw.close();
             JOptionPane.showMessageDialog(
                 null,
-                sw.toString(),
+                e.toString(),
                 "常駐スクリーンキャプチャ",
                 JOptionPane.ERROR_MESSAGE);
         }
