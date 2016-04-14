@@ -1,1 +1,1 @@
-CreateObject("WScript.Shell").Run "sc.bat",0
+CreateObject("WScript.Shell").Run """C:\Program Files\Java\jdkXXXXX\bin\javaw.exe""" + " -jar sc.jar", 0
